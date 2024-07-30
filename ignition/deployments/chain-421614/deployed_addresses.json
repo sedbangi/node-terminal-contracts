@@ -1,0 +1,6 @@
+{
+  "ProxyModule#XaiNodeLicense5": "0x95259BAa9c27256bCc546b6234796693C1FF2E01",
+  "ProxyModule#TransparentUpgradeableProxy": "0xa071B627b6e9D292F52E887F8F041342C59A38e1",
+  "ProxyModule#ProxyAdmin": "0x5Bac191Df32b2709f638Bf552BA2bacB57bc41a5",
+  "XaiNodeLicense5#XaiNodeLicense5": "0xa071B627b6e9D292F52E887F8F041342C59A38e1"
+}
