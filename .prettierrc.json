@@ -1,0 +1,24 @@
+{
+  "semi": true,
+  "printWidth": 120,
+  "tabWidth": 4,
+  "endOfLine": "auto",
+  "singleQuote": true,
+  "trailingComma": "none",
+  "organizeImportsSkipDestructiveCodeActions": true,
+  "overrides": [
+    {
+      "files": "*.sol",
+      "options": {
+        "singleQuote": false
+      }
+    },
+    {
+      "files": ["*.js", "*.json", "*.ts", "*.tsx"],
+      "options": {
+        "tabWidth": 2
+      }
+    }
+  ],
+  "plugins": ["prettier-plugin-organize-imports"]
+}
