@@ -15,10 +15,6 @@
     "prettier:fix": "prettier --write \"**/*.ts\" \"contracts/**/*.sol\"",
     "prettier:check": "prettier --check \"**/*.ts\" \"contracts/**/*.sol\"",
     "test": "hardhat test",
-    "verify-mainnet": "hardhat verify --network mainnet",
-    "verify-sepolia": "hardhat verify --network sepolia",
-    "verify-arbitrum-one": "hardhat verify --network arbitrumOne",
-    "verify-arbitrum-sepolia": "hardhat verify --network arbitrumSepolia",
     "check-style": "yarn prettier:check && yarn lint",
     "static-analyze": "yarn check-style && yarn size-contracts && yarn slither",
     "validate-all": "yarn clean && yarn compile && yarn static-analyze && yarn coverage && REPORT_GAS=true yarn test && yarn docgen && yarn export-abi"
