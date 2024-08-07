@@ -1,0 +1,12 @@
+{
+  "detectors_to_run": "all",
+  "detectors_to_exclude": "incorrect-equality,timestamp",
+  "exclude_dependencies": true,
+  "exclude_optimization": true,
+  "exclude_informational": true,
+  "exclude_low": false,
+  "exclude_medium": false,
+  "exclude_high": false,
+  "fail_on": "high",
+  "filter_paths": "node_modules/|contracts/test"
+}

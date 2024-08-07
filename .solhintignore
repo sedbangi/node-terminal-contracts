@@ -1,0 +1,3 @@
+contracts/Proxies.sol
+contracts/test/NodeLicense.sol
+contracts/test/NodeLicenseErc20.sol

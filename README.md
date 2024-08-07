@@ -12,7 +12,7 @@ Create `.env` file from the `.env.example` file
 
 #### Install Node and Yarn
 
-[Node](http://nodejs.org/) at least v20 and [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/). You should be able to run the following command after the installation procedure below. Example:
+Install [Node](http://nodejs.org/) (at least v20) and [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/). You should be able to run the following command after the installation procedure below. Example:
 
 ```bash
 $ node --version
@@ -22,42 +22,41 @@ $ yarn --version
 1.22.x
 ```
 
-#### Install packages
+#### Install packages and compile
 
 ```bash
 yarn install
-```
-
-#### Compile
-
-```bash
 yarn compile
+
 ```
 
 #### QA
 
-To run code static analysis run command
+To execute code static analysis and tests run commands
 
 ```bash
 yarn static-analyze
-```
-
-To run tests execute command
-
-```bash
 yarn test
 ```
 
-You can report gas usage for each tested methods in smart contracts
+You can also report gas usage for each tested methods in smart contracts
 
 ```bash
 REPORT_GAS=true yarn test
 ```
 
-To show tests coverage report execute
+To show tests coverage report run
 
 ```bash
 yarn coverage
+```
+
+#### API documentation
+
+You can export smart contracts API documentation to html file. It will be saved in `docs` folder
+
+```bash
+yarn docgen
 ```
 
 #### Smart contracts deployment
