@@ -1,6 +1,6 @@
 import { buildModule } from '@nomicfoundation/hardhat-ignition/modules';
 import hre from 'hardhat';
-import erc20TestTokenModule from '../../ERC20TestToken';
+import erc20TestTokenModule from '../../test/ERC20TestToken';
 
 const lumiaNodeNTModule = buildModule('LumiaNodeNT', (m) => {
   const MASTER_ROLE = '0x8b8c0776df2c2176edf6f82391c35ea4891146d7a976ee36fd07f1a6fb4ead4c';
