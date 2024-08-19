@@ -12,7 +12,7 @@ import {EnumerableMap} from "@openzeppelin/contracts/utils/structs/EnumerableMap
  * @notice This is smart contract that is responsible for handling nodes sale using Node Terminal platform.
  * It collects payments in ERC-20 token (in particular USDT) and increases number of nodes assigned to the account. This data will be used for future NFT airdrop.
  */
-contract LumiaNodeNT is AccessControlEnumerable, ReentrancyGuard {
+contract NodesSale is AccessControlEnumerable, ReentrancyGuard {
     using EnumerableMap for EnumerableMap.AddressToUintMap;
     using SafeERC20 for IERC20;
 
@@ -44,12 +44,12 @@ contract LumiaNodeNT is AccessControlEnumerable, ReentrancyGuard {
     /**
      * @notice Address of wallet that collects payments
      */
-    address public immutable lumiaAddress;
+    address public immutable nodeProviderWallet;
 
     /**
      * @notice Address of wallet that collects commissions
      */
-    address public immutable ntAddress;
+    address public immutable commissionsWallet;
 
     /**
      * @notice Commissions in basis points
@@ -120,7 +120,7 @@ contract LumiaNodeNT is AccessControlEnumerable, ReentrancyGuard {
      * @notice Initialize smart contract
      * @param owner Address of contract owner
      * @param erc20PaymentToken Address of payment token
-     * @param lumiaPaymentAddress Address of wallet that collects payment
+     * @param nodeProviderPaymentAddress Address of wallet that collects payment
      * @param ntPaymentAddress Address of wallet that collects commissions
      * @param maxAllowedNodes Maximum number of nodes put on sale
      * @param ntCommissionsInBp Commissions for NT in basis points
@@ -129,7 +129,7 @@ contract LumiaNodeNT is AccessControlEnumerable, ReentrancyGuard {
     constructor(
         address owner,
         IERC20 erc20PaymentToken,
-        address lumiaPaymentAddress,
+        address nodeProviderPaymentAddress,
         address ntPaymentAddress,
         uint256 maxAllowedNodes,
         uint256 ntCommissionsInBp,
@@ -138,7 +138,7 @@ contract LumiaNodeNT is AccessControlEnumerable, ReentrancyGuard {
         if (
             owner == address(0) ||
             address(erc20PaymentToken) == address(0) ||
-            lumiaPaymentAddress == address(0) ||
+            nodeProviderPaymentAddress == address(0) ||
             ntPaymentAddress == address(0) ||
             maxAllowedNodes == 0 ||
             ntCommissionsInBp == 0 ||
@@ -149,8 +149,8 @@ contract LumiaNodeNT is AccessControlEnumerable, ReentrancyGuard {
 
         maxSupply = maxAllowedNodes;
         paymentToken = erc20PaymentToken;
-        lumiaAddress = lumiaPaymentAddress;
-        ntAddress = ntPaymentAddress;
+        nodeProviderWallet = nodeProviderPaymentAddress;
+        commissionsWallet = ntPaymentAddress;
         ntCommissions = ntCommissionsInBp;
         pricePerNode = nodePrice;
 
@@ -286,10 +286,10 @@ contract LumiaNodeNT is AccessControlEnumerable, ReentrancyGuard {
         uint256 totalAmount = numberOfNodes * getPricePerNode();
 
         uint256 ntCommissionsAmount = (totalAmount * ntCommissions) / BP_DIVISOR;
-        send(ntAddress, ntCommissionsAmount);
+        send(commissionsWallet, ntCommissionsAmount);
 
-        uint256 lumiaAmount = totalAmount - ntCommissionsAmount;
-        send(lumiaAddress, lumiaAmount);
+        uint256 providerAmount = totalAmount - ntCommissionsAmount;
+        send(nodeProviderWallet, providerAmount);
     }
 
     function addNodes(address account, uint256 numberOfNodes) internal {
