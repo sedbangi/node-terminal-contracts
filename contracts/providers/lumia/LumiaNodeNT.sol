@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.25;
+pragma solidity 0.8.24;
 
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -8,8 +8,8 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 import {EnumerableMap} from "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 
 /**
- * @title Lumia Node sale contract for Node Terminal
- * @notice This is smart contract that is responsible for handling Lumia nodes sale using Node Terminal platform.
+ * @title Node sale contract for Node Terminal
+ * @notice This is smart contract that is responsible for handling nodes sale using Node Terminal platform.
  * It collects payments in ERC-20 token (in particular USDT) and increases number of nodes assigned to the account. This data will be used for future NFT airdrop.
  */
 contract LumiaNodeNT is AccessControlEnumerable, ReentrancyGuard {
@@ -81,6 +81,12 @@ contract LumiaNodeNT is AccessControlEnumerable, ReentrancyGuard {
     event NumberOfNodesUpdated(address indexed account, uint256 numberOfNodes);
 
     /**
+     * @notice Emitted when sale activation status is set
+     * @param isActive New activation status
+     */
+    event SaleActivationSet(bool indexed isActive);
+
+    /**
      * @notice Raised when number of nodes exceeds the available ones
      */
     error NodesAllAllocated();
@@ -131,10 +137,11 @@ contract LumiaNodeNT is AccessControlEnumerable, ReentrancyGuard {
     ) {
         if (
             owner == address(0) ||
-            maxAllowedNodes == 0 ||
             address(erc20PaymentToken) == address(0) ||
             lumiaPaymentAddress == address(0) ||
             ntPaymentAddress == address(0) ||
+            maxAllowedNodes == 0 ||
+            ntCommissionsInBp == 0 ||
             nodePrice == 0
         ) {
             revert InvalidParameter();
@@ -178,6 +185,7 @@ contract LumiaNodeNT is AccessControlEnumerable, ReentrancyGuard {
      */
     function setIsSaleActive(bool state) external onlyRole(MASTER_ROLE) {
         isSaleActive = state;
+        emit SaleActivationSet(state);
     }
 
     /**

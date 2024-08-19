@@ -137,6 +137,22 @@ describe('Lumia Node NT tests', () => {
       ).to.be.reverted;
     });
 
+    it('should revert deploying if commissions is zero', async () => {
+      const [defaultAdmin] = await ethers.getSigners();
+      const { erc20TestToken } = await ignition.deploy(erc20TestTokenModule);
+      await expect(
+        ethers.deployContract('LumiaNodeNT', [
+          defaultAdmin.address,
+          await erc20TestToken.getAddress(),
+          lumiaPaymentAddress,
+          ntPaymentAddress,
+          maxAllowedNodes,
+          0,
+          nodePrice
+        ])
+      ).to.be.reverted;
+    });
+
     it('should revert deploying if node price is zero', async () => {
       const [defaultAdmin] = await ethers.getSigners();
       const { erc20TestToken } = await ignition.deploy(erc20TestTokenModule);
@@ -158,10 +174,16 @@ describe('Lumia Node NT tests', () => {
     it('should set the sale active state', async () => {
       const { lumiaNodeNT, master } = await loadFixture(setup);
 
-      await lumiaNodeNT.connect(master).setIsSaleActive(true);
+      await expect(lumiaNodeNT.connect(master).setIsSaleActive(true))
+        .to.emit(lumiaNodeNT, 'SaleActivationSet')
+        .withArgs(true);
+
       expect(await lumiaNodeNT.isSaleActive()).to.be.true;
 
-      await lumiaNodeNT.connect(master).setIsSaleActive(false);
+      await expect(lumiaNodeNT.connect(master).setIsSaleActive(false))
+        .to.emit(lumiaNodeNT, 'SaleActivationSet')
+        .withArgs(false);
+
       expect(await lumiaNodeNT.isSaleActive()).to.be.false;
     });
 
@@ -229,7 +251,9 @@ describe('Lumia Node NT tests', () => {
       const { lumiaNodeNT, admin, user } = await loadFixture(setup);
       const numberOfNodes = 5;
 
-      await lumiaNodeNT.connect(admin).addMultipleNodes(user.address, numberOfNodes);
+      await expect(lumiaNodeNT.connect(admin).addMultipleNodes(user.address, numberOfNodes))
+        .to.emit(lumiaNodeNT, 'NodesAirdropped')
+        .withArgs(user.address, numberOfNodes);
 
       expect(await lumiaNodeNT.getNumberOfNodes(user.address)).to.equal(numberOfNodes);
     });
@@ -257,7 +281,9 @@ describe('Lumia Node NT tests', () => {
         expect(await lumiaNodeNT.getAvailableNodes()).to.equal(maxSupply);
 
         await ett.connect(user).approve(await lumiaNodeNT.getAddress(), BigInt(quantity) * nodePrice);
-        await lumiaNodeNT.connect(user).purchaseNodes(quantity);
+        await expect(lumiaNodeNT.connect(user).purchaseNodes(quantity))
+          .to.emit(lumiaNodeNT, 'NodesPurchased')
+          .withArgs(user.address, quantity);
 
         expect(await lumiaNodeNT.getNumberOfNodes(user.address)).to.equal(quantity);
         expect(await lumiaNodeNT.nodeCount()).to.equal(quantity);
