@@ -2,7 +2,7 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 import { parseEther } from 'ethers';
 import { ethers, ignition } from 'hardhat';
-import nodesSaleModule from '../ignition/modules/providers/lumia/NodesSale';
+import nodesSaleModule from '../ignition/modules/NodesSale';
 import erc20TestTokenModule from '../ignition/modules/test/ERC20TestToken';
 import { ERC20TestToken, NodesSale } from '../typechain-types';
 

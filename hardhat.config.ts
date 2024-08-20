@@ -35,7 +35,10 @@ const config: HardhatUserConfig = {
       arbitrumSepolia: env.ARBISCAN_API_KEY!,
       polygon: env.POLYGONSCAN_API_KEY!,
       amoy: env.POLYGONSCAN_API_KEY!,
-      base: env.BASESCAN_API_KEY!
+      base: env.BASESCAN_API_KEY!,
+      baseSepolia: env.BASESCAN_API_KEY!,
+      bsc: env.BSCSCAN_API_KEY!,
+      bscTestnet: env.BSCSCAN_API_KEY!
     },
     customChains: [
       {
@@ -44,6 +47,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: 'https://api-amoy.polygonscan.com/api',
           browserURL: 'https://amoy.polygonscan.com/'
+        }
+      },
+      {
+        network: 'arbitrumSepolia',
+        chainId: 421614,
+        urls: {
+          apiURL: 'https://api-sepolia.arbiscan.io/api',
+          browserURL: 'https://sepolia.arbiscan.io/'
         }
       }
     ]

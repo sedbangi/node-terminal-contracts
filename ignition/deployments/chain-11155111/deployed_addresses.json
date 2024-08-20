@@ -1,3 +1,7 @@
 {
-  "LumiaNodeNT#LumiaNodeNT": "0x300E1d997B3C128bb83681f81015bF32b3eB6dbd"
+  "LumiaNodeNT#LumiaNodeNT": "0x300E1d997B3C128bb83681f81015bF32b3eB6dbd",
+  "ProxyModule#ERC20TestToken": "0x7Aa0E0581171abCfe5E285bf2F0d62949D13c776",
+  "ProxyModule#TransparentUpgradeableProxy": "0xd0ffBDe40baA01604234cA9d9D82f17EcA75Ea05",
+  "ProxyModule#ProxyAdmin": "0x8E4b01733EF3f1CE41092C8786f51208F4A768e6",
+  "ERC20TestToken#ERC20TestToken": "0xd0ffBDe40baA01604234cA9d9D82f17EcA75Ea05"
 }

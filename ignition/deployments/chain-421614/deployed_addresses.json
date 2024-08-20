@@ -1,6 +1,10 @@
 {
-  "ProxyModule#XaiNodeLicense5": "0x95259BAa9c27256bCc546b6234796693C1FF2E01",
-  "ProxyModule#TransparentUpgradeableProxy": "0xa071B627b6e9D292F52E887F8F041342C59A38e1",
-  "ProxyModule#ProxyAdmin": "0x5Bac191Df32b2709f638Bf552BA2bacB57bc41a5",
-  "XaiNodeLicense5#XaiNodeLicense5": "0xa071B627b6e9D292F52E887F8F041342C59A38e1"
+  "ProxyModule#ERC20TestToken": "0xD13Dd55653A49e29b9e3db109569FeC9925bF766",
+  "ProxyModule#TransparentUpgradeableProxy": "0x05f0BDC9e7ecC1eDD134b309F116AB7fFF2245Ee",
+  "ProxyModule#ProxyAdmin": "0x242E04f26B2493Bf6E194148F89b222ec32f03A9",
+  "ERC20TestToken#ERC20TestToken": "0x05f0BDC9e7ecC1eDD134b309F116AB7fFF2245Ee",
+  "NodesSale#NodesSale": "0x22CF31F71f0295ff4D9b04eA22f68b99f20d2970",
+  "NodesSale#RevolvingGamesTier2": "0xEeFc16269d5d5d2fE909B0a50751CBf8eE29CF3D",
+  "RevolvingGames#Tier1": "0xAb663F5a55CDF1Db3BA654e4Bc9Ab08Be120dE38",
+  "RevolvingGames#Tier2": "0xc0E07610ed3dc0497d469c6695F9F2Ed50B9bafe"
 }

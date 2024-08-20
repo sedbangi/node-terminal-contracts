@@ -1,0 +1,6 @@
+{
+  "ProxyModule#ERC20TestToken": "0xb43eD00813cc11cfCf42Aad22797a5E43100386e",
+  "ProxyModule#TransparentUpgradeableProxy": "0xc94af990Ff4fCbDA035ac6965907fd0345b1AB3B",
+  "ProxyModule#ProxyAdmin": "0x03a1431246293b5b459a6002195Cb0A4BA9e091b",
+  "ERC20TestToken#ERC20TestToken": "0xc94af990Ff4fCbDA035ac6965907fd0345b1AB3B"
+}
