@@ -18,7 +18,6 @@ const proxyModule = buildModule('ProxyModule', (m) => {
 });
 
 const erc20TestTokenModule = buildModule('ERC20TestToken', (m) => {
-  const admin = m.getAccount(0);
   const { proxy, proxyAdmin } = m.useModule(proxyModule);
 
   const erc20TestToken = m.contractAt('ERC20TestToken', proxy);

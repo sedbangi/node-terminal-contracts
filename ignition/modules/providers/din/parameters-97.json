@@ -1,15 +1,15 @@
 {
   "Din": {
     "owner": "0xc65F1bcBFc6eD856dbD335bc9f4e748b029bc0Ff",
-    "paymentToken": "0xc94af990Ff4fCbDA035ac6965907fd0345b1AB3B",
-    "nodeProviderWallet": "",
+    "paymentToken": "0x5582fA22ACc27Ab98991C38A4BDB91D3f09F91d2",
+    "nodeProviderWallet": "0xD57e28773c92E6fB9D9Fb164889886cd360074BE",
     "commissionsWallet": "0xfD4bE09AED95DBcf2fA7bDB662D4cAEc07eD4BD6",
     "ntCommissionsInBp": 1000,
     "tier1MaxAllowedNodes": 5000,
-    "tier1NodePrice": 99e6,
+    "tier1NodePrice": "99000000000000000000",
     "tier2MaxAllowedNodes": 5000,
-    "tier2NodePrice": 149e6,
+    "tier2NodePrice": "149000000000000000000",
     "tier3MaxAllowedNodes": 4000,
-    "tier3NodePrice": 199e6
+    "tier3NodePrice": "199000000000000000000"
   }
 }
