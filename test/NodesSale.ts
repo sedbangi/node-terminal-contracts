@@ -1,6 +1,6 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
-import { parseEther } from 'ethers';
+import { parseEther, ZeroAddress } from 'ethers';
 import { ethers, ignition } from 'hardhat';
 import nodesSaleModule from '../ignition/modules/NodesSale';
 import erc20TestTokenModule from '../ignition/modules/test/ERC20TestToken';
@@ -17,7 +17,7 @@ describe('Nodes Sale tests', () => {
   const ntCommissionsInBp = 1250n;
   const nodePrice = 1000e6;
 
-  const setup = async () => {
+  const setupWithErc20 = async () => {
     const [deployer, defaultAdmin, admin, master, user, minter] = await ethers.getSigners();
 
     const { erc20TestToken } = (await ignition.deploy(erc20TestTokenModule)) as unknown as {
@@ -45,9 +45,32 @@ describe('Nodes Sale tests', () => {
     return { nodesSale, ett: erc20TestToken, deployer, defaultAdmin, admin, master, user, minter };
   };
 
+  const setupWithEth = async () => {
+    const [deployer, defaultAdmin, admin, master, user, minter] = await ethers.getSigners();
+
+    const { nodesSale } = (await ignition.deploy(nodesSaleModule, {
+      parameters: {
+        NodesSale: {
+          owner: defaultAdmin.address,
+          paymentToken: ZeroAddress,
+          nodeProviderWallet,
+          commissionsWallet,
+          maxAllowedNodes,
+          ntCommissionsInBp,
+          nodePrice
+        }
+      }
+    })) as unknown as { nodesSale: NodesSale };
+
+    await nodesSale.connect(defaultAdmin).grantRole(ADMIN_ROLE, admin.address);
+    await nodesSale.connect(defaultAdmin).grantRole(MASTER_ROLE, master.address);
+
+    return { nodesSale, deployer, defaultAdmin, admin, master, user, minter };
+  };
+
   describe('deployment', () => {
     it('should deploy and return initial parameters', async () => {
-      const { nodesSale, ett, defaultAdmin, admin, master } = await loadFixture(setup);
+      const { nodesSale, ett, defaultAdmin, admin, master } = await loadFixture(setupWithErc20);
 
       expect(await nodesSale.paymentToken()).to.equal(await ett.getAddress());
       expect(await nodesSale.nodeProviderWallet()).to.equal(nodeProviderWallet);
@@ -65,21 +88,6 @@ describe('Nodes Sale tests', () => {
         ethers.deployContract('NodesSale', [
           ethers.ZeroAddress,
           await erc20TestToken.getAddress(),
-          nodeProviderWallet,
-          commissionsWallet,
-          maxAllowedNodes,
-          ntCommissionsInBp,
-          nodePrice
-        ])
-      ).to.be.reverted;
-    });
-
-    it('should revert deploying if token is zero address', async () => {
-      const [defaultAdmin] = await ethers.getSigners();
-      await expect(
-        ethers.deployContract('NodesSale', [
-          defaultAdmin.address,
-          ethers.ZeroAddress,
           nodeProviderWallet,
           commissionsWallet,
           maxAllowedNodes,
@@ -172,7 +180,7 @@ describe('Nodes Sale tests', () => {
 
   describe('setIsSaleActive', () => {
     it('should set the sale active state', async () => {
-      const { nodesSale, master } = await loadFixture(setup);
+      const { nodesSale, master } = await loadFixture(setupWithErc20);
 
       await expect(nodesSale.connect(master).setIsSaleActive(true))
         .to.emit(nodesSale, 'SaleActivationSet')
@@ -188,7 +196,7 @@ describe('Nodes Sale tests', () => {
     });
 
     it('should revert if called by a non-master role', async () => {
-      const { nodesSale, user } = await loadFixture(setup);
+      const { nodesSale, user } = await loadFixture(setupWithErc20);
 
       await expect(nodesSale.connect(user).setIsSaleActive(true))
         .to.be.revertedWithCustomError(nodesSale, 'AccessControlUnauthorizedAccount')
@@ -198,7 +206,7 @@ describe('Nodes Sale tests', () => {
 
   describe('setNumberOfNodes', () => {
     it('should set the number of nodes for an account', async () => {
-      const { nodesSale, defaultAdmin, user } = await loadFixture(setup);
+      const { nodesSale, defaultAdmin, user } = await loadFixture(setupWithErc20);
 
       const value = 10;
       await nodesSale.connect(defaultAdmin).setNumberOfNodes(user.address, value);
@@ -212,7 +220,7 @@ describe('Nodes Sale tests', () => {
     });
 
     it('should return nodes for all accounts', async () => {
-      const { nodesSale, defaultAdmin, admin, master, user } = await loadFixture(setup);
+      const { nodesSale, defaultAdmin, admin, master, user } = await loadFixture(setupWithErc20);
 
       const userValue = 10;
       const masterValue = 15;
@@ -229,7 +237,7 @@ describe('Nodes Sale tests', () => {
     });
 
     it('should revert if the number of nodes exceeds the maximum allowed', async () => {
-      const { nodesSale, defaultAdmin, user } = await loadFixture(setup);
+      const { nodesSale, defaultAdmin, user } = await loadFixture(setupWithErc20);
 
       const maxSupply = await nodesSale.maxSupply();
       await expect(
@@ -238,7 +246,7 @@ describe('Nodes Sale tests', () => {
     });
 
     it('should revert if called by a non-admin role', async () => {
-      const { nodesSale, user } = await loadFixture(setup);
+      const { nodesSale, user } = await loadFixture(setupWithErc20);
 
       await expect(nodesSale.connect(user).setNumberOfNodes(user.address, 5))
         .to.be.revertedWithCustomError(nodesSale, 'AccessControlUnauthorizedAccount')
@@ -248,7 +256,7 @@ describe('Nodes Sale tests', () => {
 
   describe('addMultipleNodes', () => {
     it('should add multiple nodes to an account', async () => {
-      const { nodesSale, admin, user } = await loadFixture(setup);
+      const { nodesSale, admin, user } = await loadFixture(setupWithErc20);
       const numberOfNodes = 5;
 
       await expect(nodesSale.connect(admin).addMultipleNodes(user.address, numberOfNodes))
@@ -259,7 +267,7 @@ describe('Nodes Sale tests', () => {
     });
 
     it('should revert if called by a non-admin role', async () => {
-      const { nodesSale, admin, user } = await loadFixture(setup);
+      const { nodesSale, admin, user } = await loadFixture(setupWithErc20);
       const numberOfNodes = 5;
 
       await expect(nodesSale.connect(user).addMultipleNodes(user.address, numberOfNodes))
@@ -271,7 +279,7 @@ describe('Nodes Sale tests', () => {
   describe('purchaseNodes', () => {
     [1n, maxAllowedNodes].forEach((quantity) =>
       it(`should purchase nodes [quantity=${quantity}]`, async () => {
-        const { nodesSale, ett, master, user } = await loadFixture(setup);
+        const { nodesSale, ett, master, user } = await loadFixture(setupWithErc20);
         const nodePrice = await nodesSale.getPricePerNode();
         const maxSupply = await nodesSale.maxSupply();
 
@@ -280,7 +288,7 @@ describe('Nodes Sale tests', () => {
         expect(await nodesSale.getNumberOfNodes(user.address)).to.equal(0);
         expect(await nodesSale.getAvailableNodes()).to.equal(maxSupply);
 
-        await ett.connect(user).approve(await nodesSale.getAddress(), BigInt(quantity) * nodePrice);
+        await ett.connect(user).approve(await nodesSale.getAddress(), quantity * nodePrice);
         await expect(nodesSale.connect(user).purchaseNodes(quantity))
           .to.emit(nodesSale, 'NodesPurchased')
           .withArgs(user.address, quantity);
@@ -293,7 +301,7 @@ describe('Nodes Sale tests', () => {
     );
 
     it(`should multiple users purchase nodes`, async () => {
-      const { nodesSale, ett, master, user } = await loadFixture(setup);
+      const { nodesSale, ett, master, user } = await loadFixture(setupWithErc20);
       const nodePrice = await nodesSale.getPricePerNode();
       const maxSupply = await nodesSale.maxSupply();
       const userQuantity = 10n;
@@ -320,8 +328,8 @@ describe('Nodes Sale tests', () => {
       expect(await ett.balanceOf(commissionsWallet)).to.equal(3375e6);
     });
 
-    it(`should transfer tokens to Lumia and NT wallets`, async () => {
-      const { nodesSale, ett, master, user } = await loadFixture(setup);
+    it(`should transfer tokens to node provider and NT wallets`, async () => {
+      const { nodesSale, ett, master, user } = await loadFixture(setupWithErc20);
       const nodePrice = await nodesSale.getPricePerNode();
 
       await nodesSale.connect(master).setIsSaleActive(true);
@@ -334,7 +342,7 @@ describe('Nodes Sale tests', () => {
     });
 
     it('should revert if sale inactive', async () => {
-      const { nodesSale, ett, user } = await loadFixture(setup);
+      const { nodesSale, ett, user } = await loadFixture(setupWithErc20);
       const nodePrice = await nodesSale.getPricePerNode();
 
       await ett.connect(user).approve(await nodesSale.getAddress(), 1n * nodePrice);
@@ -343,7 +351,7 @@ describe('Nodes Sale tests', () => {
     });
 
     it('should revert if purchasing zero nodes', async () => {
-      const { nodesSale, master, user } = await loadFixture(setup);
+      const { nodesSale, master, user } = await loadFixture(setupWithErc20);
 
       await nodesSale.connect(master).setIsSaleActive(true);
 
@@ -354,7 +362,7 @@ describe('Nodes Sale tests', () => {
     });
 
     it('should revert if insufficient token balance', async () => {
-      const { nodesSale, ett, defaultAdmin, master } = await loadFixture(setup);
+      const { nodesSale, ett, defaultAdmin, master } = await loadFixture(setupWithErc20);
 
       await nodesSale.connect(master).setIsSaleActive(true);
 
@@ -366,7 +374,7 @@ describe('Nodes Sale tests', () => {
     });
 
     it('should revert if insufficient token allowance', async () => {
-      const { nodesSale, ett, master, user } = await loadFixture(setup);
+      const { nodesSale, ett, master, user } = await loadFixture(setupWithErc20);
       const nodePrice = await nodesSale.getPricePerNode();
       const quantity = 10;
 
@@ -380,7 +388,7 @@ describe('Nodes Sale tests', () => {
     });
 
     it('should revert if max allowed tokens exceeded', async () => {
-      const { nodesSale, ett, master, user } = await loadFixture(setup);
+      const { nodesSale, ett, master, user } = await loadFixture(setupWithErc20);
       const nodePrice = await nodesSale.getPricePerNode();
       const maxSupply = await nodesSale.maxSupply();
       const quantity = maxSupply + 1n;
@@ -391,6 +399,51 @@ describe('Nodes Sale tests', () => {
       await expect(nodesSale.connect(user).purchaseNodes(quantity)).to.be.revertedWithCustomError(
         nodesSale,
         'NodesAllAllocated'
+      );
+    });
+
+    [1n, maxAllowedNodes].forEach((quantity) => {
+      it(`should purchase nodes with ETH [quantity=${quantity}]`, async () => {
+        const { nodesSale, master, user } = await loadFixture(setupWithEth);
+        const nodePrice = await nodesSale.getPricePerNode();
+        const maxSupply = await nodesSale.maxSupply();
+
+        await nodesSale.connect(master).setIsSaleActive(true);
+
+        expect(await nodesSale.getNumberOfNodes(user.address)).to.equal(0);
+        expect(await nodesSale.getAvailableNodes()).to.equal(maxSupply);
+
+        await expect(nodesSale.connect(user).purchaseNodes(quantity, { value: quantity * nodePrice }))
+          .to.emit(nodesSale, 'NodesPurchased')
+          .withArgs(user.address, quantity);
+
+        expect(await nodesSale.getNumberOfNodes(user.address)).to.equal(quantity);
+        expect(await nodesSale.nodeCount()).to.equal(quantity);
+        expect(await nodesSale.getAvailableNodes()).to.equal(maxSupply - quantity);
+        expect(await nodesSale.getAccounts()).to.deep.equal([user.address]);
+      });
+    });
+
+    it('should transfer ETH to node provider and NT wallets', async () => {
+      const { nodesSale, master, user } = await loadFixture(setupWithEth);
+      const nodePrice = await nodesSale.getPricePerNode();
+
+      await nodesSale.connect(master).setIsSaleActive(true);
+      await nodesSale.connect(user).purchaseNodes(1n, { value: nodePrice });
+
+      expect(await ethers.provider.getBalance(nodeProviderWallet)).to.equal(875e6);
+      expect(await ethers.provider.getBalance(commissionsWallet)).to.equal(125e6);
+    });
+
+    it('should revert if insufficient ETH sent', async () => {
+      const { nodesSale, master, user } = await loadFixture(setupWithEth);
+      const nodePrice = await nodesSale.getPricePerNode();
+
+      await nodesSale.connect(master).setIsSaleActive(true);
+
+      await expect(nodesSale.connect(user).purchaseNodes(1n, { value: nodePrice - 1n })).to.be.revertedWithCustomError(
+        nodesSale,
+        'InsufficientBalance'
       );
     });
   });

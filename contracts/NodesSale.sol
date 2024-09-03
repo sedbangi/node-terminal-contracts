@@ -39,7 +39,7 @@ contract NodesSale is AccessControlEnumerable, ReentrancyGuard {
     /**
      * @notice Address of token used for payment
      */
-    IERC20 public immutable paymentToken;
+    address public immutable paymentToken;
 
     /**
      * @notice Address of wallet that collects payments
@@ -119,7 +119,7 @@ contract NodesSale is AccessControlEnumerable, ReentrancyGuard {
     /**
      * @notice Initialize smart contract
      * @param owner Address of contract owner
-     * @param erc20PaymentToken Address of payment token
+     * @param erc20PaymentToken Address of payment token, if 0x0 then ETH is used
      * @param nodeProviderPaymentAddress Address of wallet that collects payment
      * @param ntPaymentAddress Address of wallet that collects commissions
      * @param maxAllowedNodes Maximum number of nodes put on sale
@@ -128,7 +128,7 @@ contract NodesSale is AccessControlEnumerable, ReentrancyGuard {
      */
     constructor(
         address owner,
-        IERC20 erc20PaymentToken,
+        address erc20PaymentToken,
         address nodeProviderPaymentAddress,
         address ntPaymentAddress,
         uint256 maxAllowedNodes,
@@ -137,7 +137,6 @@ contract NodesSale is AccessControlEnumerable, ReentrancyGuard {
     ) {
         if (
             owner == address(0) ||
-            address(erc20PaymentToken) == address(0) ||
             nodeProviderPaymentAddress == address(0) ||
             ntPaymentAddress == address(0) ||
             maxAllowedNodes == 0 ||
@@ -169,11 +168,17 @@ contract NodesSale is AccessControlEnumerable, ReentrancyGuard {
             revert InvalidParameter();
         }
         uint256 paymentAmount = numberOfNodes * getPricePerNode();
-        if (paymentToken.balanceOf(msg.sender) < paymentAmount) {
-            revert InsufficientBalance();
-        }
-        if (paymentToken.allowance(msg.sender, address(this)) < paymentAmount) {
-            revert InsufficientAllowance();
+        if (paymentToken == address(0)) {
+            if (msg.value < paymentAmount) {
+                revert InsufficientBalance();
+            }
+        } else {
+            if (IERC20(paymentToken).balanceOf(msg.sender) < paymentAmount) {
+                revert InsufficientBalance();
+            }
+            if (IERC20(paymentToken).allowance(msg.sender, address(this)) < paymentAmount) {
+                revert InsufficientAllowance();
+            }
         }
         _;
     }
@@ -276,7 +281,9 @@ contract NodesSale is AccessControlEnumerable, ReentrancyGuard {
      * @dev - account has sufficient allowance
      * @param numberOfNodes Number of nodes purchased
      */
-    function purchaseNodes(uint256 numberOfNodes) external saleIsActive haveEnoughToBuy(numberOfNodes) nonReentrant {
+    function purchaseNodes(
+        uint256 numberOfNodes
+    ) external payable saleIsActive haveEnoughToBuy(numberOfNodes) nonReentrant {
         sendPayments(numberOfNodes);
         addNodes(msg.sender, numberOfNodes);
         emit NodesPurchased(msg.sender, numberOfNodes);
@@ -302,6 +309,10 @@ contract NodesSale is AccessControlEnumerable, ReentrancyGuard {
     }
 
     function send(address destination, uint256 amount) internal {
-        paymentToken.safeTransferFrom(msg.sender, destination, amount);
+        if (paymentToken == address(0)) {
+            payable(destination).transfer(amount);
+        } else {
+            IERC20(paymentToken).safeTransferFrom(msg.sender, destination, amount);
+        }
     }
 }
